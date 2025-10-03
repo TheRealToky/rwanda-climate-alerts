@@ -8,6 +8,45 @@ from fetch_datasets import fetch_all
 
 chirps, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
 
+dataset_dict = {
+    "chirps": {
+        "dataset": chirps,
+        "list of bands": ["precipitation"],
+        "title": "Precipitation in ",
+        "xlabel": "Date",
+        "ylabel": "Precipitation [mm]",
+        "ylim_min": -0,
+        "ylim_max": 100
+    },
+    "era5_temp": {
+        "dataset": era5_temp,
+        "list of bands": ["temperature_2m"],
+        "title": "Temperature in ",
+        "xlabel": "Date",
+        "ylabel": "Temperature [C]",
+        "ylim_min": 10,
+        "ylim_max": 30
+    },
+    "soil_moist": {
+        "dataset": era5_temp,
+        "list of bands": ["volumetric_soil_water_layer_1"],
+        "title": "Soil moisture in ",
+        "xlabel": "Date",
+        "ylabel": "Moisture [?]",
+        "ylim_min": -0,
+        "ylim_max": 100
+    },
+    "ndvi": {
+        "dataset": ndvi,
+        "list of bands": ["NDVI"],
+        "title": "NDVI in ",
+        "xlabel": "Date",
+        "ylabel": "NDVI [?]",
+        "ylim_min": -0,
+        "ylim_max": 5
+    }
+}
+
 # Fetch Time series
 def get_time_series(image_collection, district_name, start_date, end_date, scale):
     district = ee.FeatureCollection("FAO/GAUL/2015/level2") \
@@ -51,17 +90,26 @@ def ee_array_to_df(arr, list_of_bands):
 
 
 def t_kelvin_to_celsius(t_kelvin):
-    """Converts MODIS LST units to degrees Celsius."""
+    """Converts Kelvin units to degrees Celsius."""
     t_celsius =  t_kelvin - 273.15
     return t_celsius
 
 
-def plot_dataset(dataset_info[dataset]):
+def plot_dataset(dataframe ,dataset_name, dataset_dict):
     fig, ax = plt.subplots(figsize=(14, 6))
 
-    ax.scatter(dataframe['datetime'], dataframe[band],
+    dataset = dataset_dict[dataset_name]
+
+    list_of_bands = dataset["list of bands"]
+    title = dataset["title"]
+    label = dataset["label"]
+    xlabel = dataset["xlabel"]
+    ylabel = dataset["ylabel"]
+    ylim_min = dataset["ylim_min"]
+    ylim_max = dataset["ylim_max"]
+
+    ax.scatter(dataframe["datetime"], dataframe[list_of_bands[0]],
                color='black', linewidth=1, alpha=0.7, label=label)
-               # c='black', alpha=0.2, label='Bugesera (data)')
 
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))  # e.g., "Jun 2025"
     ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
@@ -79,24 +127,3 @@ def plot_dataset(dataset_info[dataset]):
     ax.legend(fontsize=14, loc='lower right')
 
     return fig, ax
-
-
-def make_plot(image_collection, district_name, start_date, end_date, scale):
-    time_series, date_range = get_time_series(image_collection, district_name, start_date, end_date, scale)
-
-    final_df = ee_array_to_df(time_series, list_of_bands)
-
-    fig, ax = plot_dataset()
-
-    return fig, ax
-
-dataset_info = {
-    "chirps": {
-        "list of bands": ["precipitation"],
-        "title": "Precipitation in ",
-        "xlabel": "Date",
-        "ylabel": "Precipitation [mm]",
-        "ylim_min": -0,
-        "ylim_max": 100
-    }
-}
