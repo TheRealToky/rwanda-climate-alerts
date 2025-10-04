@@ -1,16 +1,6 @@
 import ee
 import geemap
 
-try:
-    ee.Authenticate()
-except Exception as e:
-    print(f"Error authenticating Earth Engine: {e}. Please ensure you have Earth Engine access.")
-
-try:
-    ee.Initialize(project="rwanda-climate-alerts")
-except Exception as e:
-    print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
-
 from geometry import districts, rwanda, rwanda_buffered
 from fetch_datasets import fetch_all
 

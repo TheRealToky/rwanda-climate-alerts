@@ -1,0 +1,7 @@
+earthengine-api~=1.6.11rc0
+matplotlib~=3.10.6
+pandas~=2.3.3
+geemap~=0.36.4
+numpy~=2.3.3
+scipy~=1.16.2
+streamlit~=1.50.0
