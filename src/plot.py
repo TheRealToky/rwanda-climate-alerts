@@ -3,8 +3,19 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 
+try:
+    ee.Authenticate()
+except Exception as e:
+    print(f"Error authenticating Earth Engine: {e}. Please ensure you have Earth Engine access.")
+
+try:
+    ee.Initialize(project="rwanda-climate-alerts")
+except Exception as e:
+    print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
+
 from geometry import districts, rwanda, rwanda_buffered
 from fetch_datasets import fetch_all
+
 
 chirps, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
 

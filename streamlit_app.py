@@ -1,25 +1,13 @@
 import streamlit as st
-import ee
-
 from src.risk_map import make_map
 from src.plot import get_time_series, ee_array_to_df, plot_dataset, dataset_dict
 from src.fetch_datasets import fetch_all
 
 def main():
-    try:
-        ee.Authenticate()
-    except Exception as e:
-        st.error(f"Error authenticating Earth Engine: {e}. Please ensure you have Earth Engine access.")
-
-    try:
-        ee.Initialize(project="rwanda-climate-alerts")
-    except Exception as e:
-        st.error(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
     chirps, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
-
     st.write('''
     Welcome to rwanda-climate-alerts!
-    
+
     Feel free to look up maps and charts
     ''')
 
