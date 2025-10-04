@@ -1,8 +1,8 @@
 import ee
 import geemap
 
-from geometry import districts, rwanda, rwanda_buffered
-from fetch_datasets import fetch_all
+from src.geometry import districts, rwanda, rwanda_buffered
+from src.fetch_datasets import fetch_all
 
 chirps, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
 
@@ -59,10 +59,10 @@ def aggregate_risk(risk_index):
     return district_stats
 
 def make_map():
-    monthly_chirps, monthly_chirps_sum = aggregate_monthly(chirps)
-    monthly_era5_temp, monthly_era5_temp_sum = aggregate_monthly(era5_temp)
-    monthly_soil_moist, monthly_soil_moist_sum = aggregate_monthly(soil_moist)
-    monthly_ndvi, monthly_ndvi_sum = aggregate_monthly(ndvi)
+    # monthly_chirps, monthly_chirps_sum = aggregate_monthly(chirps)
+    # monthly_era5_temp, monthly_era5_temp_sum = aggregate_monthly(era5_temp)
+    # monthly_soil_moist, monthly_soil_moist_sum = aggregate_monthly(soil_moist)
+    # monthly_ndvi, monthly_ndvi_sum = aggregate_monthly(ndvi)
 
 
     rain_baseline, rain_baseline_mean, rain_anomaly = calculate_baseline(chirps)
@@ -96,9 +96,9 @@ def make_map():
                             .add(slope_norm.multiply(0.3))
 
 
-    flood_risk_stats = aggregate_risk(flood_risk_index)
-    drought_risk_stats = aggregate_risk(drought_risk_index)
-    landslide_risk_stats = aggregate_risk(landslide_risk_index)
+    # flood_risk_stats = aggregate_risk(flood_risk_index)
+    # drought_risk_stats = aggregate_risk(drought_risk_index)
+    # landslide_risk_stats = aggregate_risk(landslide_risk_index)
 
 
     map = geemap.Map()

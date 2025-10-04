@@ -1,6 +1,6 @@
 # Imports and Pre-requisites
 import ee
-from geometry import districts, rwanda, rwanda_buffered
+from src.geometry import districts, rwanda, rwanda_buffered
 
 # Collect Datasets
 def fetch_dataset(image_collection,

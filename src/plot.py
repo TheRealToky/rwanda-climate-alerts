@@ -3,9 +3,8 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 
-from geometry import districts, rwanda, rwanda_buffered
-from fetch_datasets import fetch_all
-
+from src.geometry import districts, rwanda, rwanda_buffered
+from src.fetch_datasets import fetch_all
 
 chirps, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
 
