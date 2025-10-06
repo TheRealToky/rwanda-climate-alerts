@@ -4,16 +4,16 @@ try:
 except Exception as e:
     print(f"Error authenticating Earth Engine: {e}. Please ensure you have Earth Engine access.")
 
-try:
-    ee.Initialize(project="rwanda-climate-alerts")
-except Exception as e:
-    print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
+# try:
+#     ee.Initialize(project="rwanda-climate-alerts")
+# except Exception as e:
+#     print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 
-from src.geometry import districts, rwanda, rwanda_buffered
+# from src.geometry import districts, rwanda, rwanda_buffered
 from src.fetch_datasets import fetch_all
 
 chirps, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
@@ -38,13 +38,13 @@ dataset_dict = {
         "ylim_max": 30
     },
     "soil_moist": {
-        "dataset": era5_temp,
+        "dataset": soil_moist,
         "list of bands": ["volumetric_soil_water_layer_1"],
         "title": "Soil moisture in ",
         "xlabel": "Date",
         "ylabel": "Moisture [?]",
         "ylim_min": -0,
-        "ylim_max": 100
+        "ylim_max": 1
     },
     "ndvi": {
         "dataset": ndvi,
@@ -53,7 +53,7 @@ dataset_dict = {
         "xlabel": "Date",
         "ylabel": "NDVI [?]",
         "ylim_min": -0,
-        "ylim_max": 5
+        "ylim_max": 10000
     }
 }
 
@@ -69,9 +69,9 @@ def get_time_series(image_collection, district_name, start_date, end_date, scale
                             .getRegion(district, scale=scale) \
                             .getInfo()
 
-    date_range = [start_date, end_date]
+    # date_range = [start_date, end_date]
 
-    return district_time_series, date_range
+    return district_time_series
 
 
 # Convert to pandas DataFrame
@@ -111,11 +111,14 @@ def plot_dataset(dataframe, district, dataset_name, dataset_info):
     dataset = dataset_info[dataset_name]
 
     list_of_bands = dataset["list of bands"]
-    title = dataset["title"]
+    title = dataset["title"] + district
     xlabel = dataset["xlabel"]
     ylabel = dataset["ylabel"]
     ylim_min = dataset["ylim_min"]
     ylim_max = dataset["ylim_max"]
+
+    if dataset_name == "era5_temp":
+        dataframe["temperature_2m"] = dataframe["temperature_2m"].apply(t_kelvin_to_celsius)
 
     ax.scatter(dataframe["datetime"], dataframe[list_of_bands[0]],
                color='gray', linewidth=1, alpha=0.7, label=f"{district} (trend)")
@@ -137,19 +140,19 @@ def plot_dataset(dataframe, district, dataset_name, dataset_info):
 
     return fig, ax
 
-# def main():
-#     district_time_series, date_range = get_time_series(
-#         dataset_dict["chirps"]["dataset"],
-#         "Bugesera",
-#         "2024-01-01",
-#         "2024-12-31",
-#         1000)
-#
-#     df = ee_array_to_df(district_time_series, dataset_dict["chirps"]["list of bands"])
-#
-#     # Plot with matplotlib
-#     fig, ax = plot_dataset(df, "Bugesera", "chirps", dataset_dict)
-#     plt.show()
-#
-# if __name__ == '__main__':
-#     main()
+def main():
+    district_time_series, date_range = get_time_series(
+        dataset_dict["chirps"]["dataset"],
+        "Bugesera",
+        "2024-01-01",
+        "2024-12-31",
+        1000)
+
+    df = ee_array_to_df(district_time_series, dataset_dict["chirps"]["list of bands"])
+
+    # Plot with matplotlib
+    fig, ax = plot_dataset(df, "Bugesera", "chirps", dataset_dict)
+    plt.show()
+
+if __name__ == '__main__':
+    main()

@@ -1,4 +1,4 @@
-import geemap
+# import geemap
 import ee
 try:
     ee.Authenticate()
@@ -67,7 +67,8 @@ def aggregate_risk(risk_index):
     )
     return district_stats
 
-def make_map():
+
+def calculate_indexes():
     # monthly_chirps, monthly_chirps_sum = aggregate_monthly(chirps)
     # monthly_era5_temp, monthly_era5_temp_sum = aggregate_monthly(era5_temp)
     # monthly_soil_moist, monthly_soil_moist_sum = aggregate_monthly(soil_moist)
@@ -109,25 +110,44 @@ def make_map():
     # drought_risk_stats = aggregate_risk(drought_risk_index)
     # landslide_risk_stats = aggregate_risk(landslide_risk_index)
 
+    return flood_risk_index, drought_risk_index, landslide_risk_index
 
-    Map = geemap.Map()
-    Map.centerObject(districts, 7)
 
-    vis_params = {"min": 0, "max": 1, "palette": ["green", "yellow", "red"]}
-    Map.addLayer(flood_risk_index, vis_params, "Flood Risk Index")
-    Map.addLayer(drought_risk_index, vis_params, "Drought Risk Index")
-    Map.addLayer(landslide_risk_index, vis_params, "Landslide Risk Index")
+flood_risk, drought_risk, landslide_risk = calculate_indexes()
+map_layers_dict = {
+    "districts": districts,
+    "flood": flood_risk,
+    "drought": drought_risk,
+    "landslide": landslide_risk,
+}
 
-    # Add district boundaries
-    Map.addLayer(districts, {"color": "black"}, "Districts")
+def get_image_url(selected_layer):
+    dataset = map_layers_dict[selected_layer]
+    if selected_layer == "districts":
+        fc = dataset
+        # vis = {"color": "black"}
+        vis = {"palette": ["black"]}
+        image = ee.Image().paint(fc, 0, 1)
+        map_id = ee.data.getMapId({"image": image.visualize(**vis)})
+        tile_url = map_id["tile_fetcher"].url_format
 
-    # map.save("map.html")
-    return Map
+    else:
+        vis_params = {"min": 0, "max": 1, "palette": ["green", "yellow", "red"]}
+        map_id_dict = ee.data.getMapId({'image': dataset.visualize(**vis_params)})
+        tile_url = map_id_dict['tile_fetcher'].url_format
+
+    return tile_url
 
 
 # def main():
-#     Map = make_map()
-#     Map
+#     flood_risk_index, drought_risk_index, landslide_risk_index = calculate_indexes()
+#     flood_index_url = get_image_url(flood_risk_index)
+#     drought_index_url = get_image_url(drought_risk_index)
+#     landslide_index_url = get_image_url(landslide_risk_index)
+#
+#     print("Flood Risk:", flood_index_url, type(flood_index_url,))
+#     print("Drought Risk:", drought_index_url, type(drought_index_url,))
+#     print("Landslide Risk:", landslide_index_url, type(landslide_index_url,))
 #
 # if __name__ == '__main__':
 #     main()

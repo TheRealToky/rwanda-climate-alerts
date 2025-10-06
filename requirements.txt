@@ -1,3 +1,4 @@
+dash-leaflet
 dash
 dash-bootstrap-components
 earthengine-api~=1.6.11rc0
