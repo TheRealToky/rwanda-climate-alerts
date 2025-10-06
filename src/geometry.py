@@ -1,5 +1,14 @@
 # Imports and Pre-requisites
 import ee
+try:
+    ee.Authenticate()
+except Exception as e:
+    print(f"Error authenticating Earth Engine: {e}. Please ensure you have Earth Engine access.")
+
+try:
+    ee.Initialize(project="rwanda-climate-alerts")
+except Exception as e:
+    print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
 
 # Fetch the district outline of Rwanda
 districts = ee.FeatureCollection("FAO/GAUL/2015/level2") \

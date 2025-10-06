@@ -1,4 +1,14 @@
 import ee
+try:
+    ee.Authenticate()
+except Exception as e:
+    print(f"Error authenticating Earth Engine: {e}. Please ensure you have Earth Engine access.")
+
+try:
+    ee.Initialize(project="rwanda-climate-alerts")
+except Exception as e:
+    print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
+
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
@@ -95,21 +105,20 @@ def t_kelvin_to_celsius(t_kelvin):
     return t_celsius
 
 
-def plot_dataset(dataframe ,dataset_name, dataset_dict):
+def plot_dataset(dataframe, district, dataset_name, dataset_info):
     fig, ax = plt.subplots(figsize=(14, 6))
 
-    dataset = dataset_dict[dataset_name]
+    dataset = dataset_info[dataset_name]
 
     list_of_bands = dataset["list of bands"]
     title = dataset["title"]
-    label = dataset["label"]
     xlabel = dataset["xlabel"]
     ylabel = dataset["ylabel"]
     ylim_min = dataset["ylim_min"]
     ylim_max = dataset["ylim_max"]
 
     ax.scatter(dataframe["datetime"], dataframe[list_of_bands[0]],
-               color='black', linewidth=1, alpha=0.7, label=label)
+               color='gray', linewidth=1, alpha=0.7, label=f"{district} (trend)")
 
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))  # e.g., "Jun 2025"
     ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
@@ -127,3 +136,20 @@ def plot_dataset(dataframe ,dataset_name, dataset_dict):
     ax.legend(fontsize=14, loc='lower right')
 
     return fig, ax
+
+# def main():
+#     district_time_series, date_range = get_time_series(
+#         dataset_dict["chirps"]["dataset"],
+#         "Bugesera",
+#         "2024-01-01",
+#         "2024-12-31",
+#         1000)
+#
+#     df = ee_array_to_df(district_time_series, dataset_dict["chirps"]["list of bands"])
+#
+#     # Plot with matplotlib
+#     fig, ax = plot_dataset(df, "Bugesera", "chirps", dataset_dict)
+#     plt.show()
+#
+# if __name__ == '__main__':
+#     main()

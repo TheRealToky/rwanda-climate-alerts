@@ -1,0 +1,89 @@
+from dash import Dash, html, dcc, Input, Output
+import dash_bootstrap_components as dbc
+import pandas as pd
+
+from src.fetch_datasets import fetch_all
+from src.plot import get_time_series, ee_array_to_df, plot_dataset
+
+district_df = pd.read_csv("data/district_boundaries/csv/District_Boundaries.csv")
+districts = district_df["district"].unique()
+chirps, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
+
+dataset_dict = {
+    "chirps": {
+        "dataset": chirps,
+        "list of bands": ["precipitation"],
+        "title": "Precipitation in ",
+        "xlabel": "Date",
+        "ylabel": "Precipitation [mm]",
+        "ylim_min": -0,
+        "ylim_max": 100
+    },
+    "era5_temp": {
+        "dataset": era5_temp,
+        "list of bands": ["temperature_2m"],
+        "title": "Temperature in ",
+        "xlabel": "Date",
+        "ylabel": "Temperature [C]",
+        "ylim_min": 10,
+        "ylim_max": 30
+    },
+    "soil_moist": {
+        "dataset": era5_temp,
+        "list of bands": ["volumetric_soil_water_layer_1"],
+        "title": "Soil moisture in ",
+        "xlabel": "Date",
+        "ylabel": "Moisture [?]",
+        "ylim_min": -0,
+        "ylim_max": 100
+    },
+    "ndvi": {
+        "dataset": ndvi,
+        "list of bands": ["NDVI"],
+        "title": "NDVI in ",
+        "xlabel": "Date",
+        "ylabel": "NDVI [?]",
+        "ylim_min": -0,
+        "ylim_max": 5
+    }
+}
+dataset_list = list(dataset_dict.values())
+
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col([
+            html.Iframe(
+                srcDoc=open("map.html", "r").read(),
+                width="100%",
+                height="500px",
+                style={"border": "none"}
+            )
+        # ])
+        ], width=6),
+
+        dbc.Col([
+            html.H5("Select district"),
+            dcc.Dropdown(
+                options=[{"label": d, "value": d} for d in districts],
+                value=districts[0],
+                id="district-dropdown"
+            ),
+            dcc.Dropdown(
+                options=[{"label": d, "value": d} for d in dataset_list],
+                value=dataset_list[0],
+                id="dataset-dropdown"
+            ),
+            html.Img(id="risk-plot", style={"width": "100%", "marginTop": "10px"})
+        ], width=6)
+    ])
+], fluid=True)
+
+if __name__ == "__main__":
+    app.run(
+        debug=True
+        # dev_tools_props_check=True,
+        # dev_tools_hot_reload=True,
+        # dev_tools_ui=True,
+        # dev_tools_silence_routes_logging=False
+    )

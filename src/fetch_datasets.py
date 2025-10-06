@@ -1,5 +1,14 @@
 # Imports and Pre-requisites
 import ee
+try:
+    ee.Authenticate()
+except Exception as e:
+    print(f"Error authenticating Earth Engine: {e}. Please ensure you have Earth Engine access.")
+
+try:
+    ee.Initialize(project="rwanda-climate-alerts")
+except Exception as e:
+    print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
 from src.geometry import districts, rwanda, rwanda_buffered
 
 # Collect Datasets
@@ -34,7 +43,7 @@ def fetch_all():
                                band="volumetric_soil_water_layer_1")
 
     # MODIS NDVI (monthly, 250 m)
-    ndvi = fetch_dataset("MODIS/006/MOD13A1",
+    ndvi = fetch_dataset("MODIS/061/MOD13A1",
                          select=True,
                          band="NDVI")
 
@@ -45,3 +54,19 @@ def fetch_all():
     slope = ee.Terrain.slope(dem)
 
     return chirps, era5_temp, soil_moist, ndvi, dem, slope
+
+
+# def main():
+#     chrips = fetch_dataset("UCSB-CHG/CHIRPS/DAILY")
+#     chirps_2, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
+#
+#     print(type(chrips))
+#     print(type(chirps_2))
+#     print(type(era5_temp))
+#     print(type(era5_temp))
+#     print(type(ndvi))
+#     print(type(dem))
+#     print(type(slope))
+#
+# if __name__ == "__main__":
+#     main()

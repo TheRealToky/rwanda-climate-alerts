@@ -1,7 +1,16 @@
-import ee
 import geemap
+import ee
+try:
+    ee.Authenticate()
+except Exception as e:
+    print(f"Error authenticating Earth Engine: {e}. Please ensure you have Earth Engine access.")
 
-from src.geometry import districts, rwanda, rwanda_buffered
+try:
+    ee.Initialize(project="rwanda-climate-alerts")
+except Exception as e:
+    print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
+
+from src.geometry import districts
 from src.fetch_datasets import fetch_all
 
 chirps, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
@@ -68,15 +77,15 @@ def make_map():
     rain_baseline, rain_baseline_mean, rain_anomaly = calculate_baseline(chirps)
     temp_baseline, temp_baseline_mean, temp_anomaly = calculate_baseline(era5_temp)
     soil_moist_baseline, soil_moist_baseline_mean, soil_moist_anomaly = calculate_baseline(soil_moist)
-    ndvi_baseline, ndvi_baseline_mean, ndvi_anomaly = calculate_baseline(ndvi)
+    # ndvi_baseline, ndvi_baseline_mean, ndvi_anomaly = calculate_baseline(ndvi)
 
 
     rain_norm = normalize(rain_anomaly, districts)
     temp_norm = normalize(temp_anomaly, districts)
     soil_moist_norm = normalize(soil_moist_anomaly, districts)
-    ndvi_norm = normalize(ndvi_anomaly, districts)
+    # ndvi_norm = normalize(ndvi_anomaly, districts)
 
-    dem_norm = normalize(dem, districts)
+    # dem_norm = normalize(dem, districts)
     slope_norm = normalize(slope, districts)
 
 
@@ -101,15 +110,24 @@ def make_map():
     # landslide_risk_stats = aggregate_risk(landslide_risk_index)
 
 
-    map = geemap.Map()
-    map.centerObject(districts, 7)
+    Map = geemap.Map()
+    Map.centerObject(districts, 7)
 
     vis_params = {"min": 0, "max": 1, "palette": ["green", "yellow", "red"]}
-    map.addLayer(flood_risk_index, vis_params, "Flood Risk Index")
-    map.addLayer(drought_risk_index, vis_params, "Drought Risk Index")
-    map.addLayer(landslide_risk_index, vis_params, "Landslide Risk Index")
+    Map.addLayer(flood_risk_index, vis_params, "Flood Risk Index")
+    Map.addLayer(drought_risk_index, vis_params, "Drought Risk Index")
+    Map.addLayer(landslide_risk_index, vis_params, "Landslide Risk Index")
 
     # Add district boundaries
-    map.addLayer(districts, {"color": "black"}, "Districts")
+    Map.addLayer(districts, {"color": "black"}, "Districts")
 
-    return map
+    # map.save("map.html")
+    return Map
+
+
+# def main():
+#     Map = make_map()
+#     Map
+#
+# if __name__ == '__main__':
+#     main()
