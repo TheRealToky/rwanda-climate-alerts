@@ -33,44 +33,6 @@ except Exception as e:
 district_df = pd.read_csv("data/district_boundaries/csv/District_Boundaries.csv")
 district_list = np.sort(district_df["district"].unique())
 chirps, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
-# dataset_dict = {
-#     "chirps": {
-#         "dataset": chirps,
-#         "list of bands": ["precipitation"],
-#         "title": "Precipitation in ",
-#         "xlabel": "Date",
-#         "ylabel": "Precipitation [mm]",
-#         "ylim_min": -0,
-#         "ylim_max": 100
-#     },
-#     "era5_temp": {
-#         "dataset": era5_temp,
-#         "list of bands": ["temperature_2m"],
-#         "title": "Temperature in ",
-#         "xlabel": "Date",
-#         "ylabel": "Temperature [C]",
-#         "ylim_min": 10,
-#         "ylim_max": 30
-#     },
-#     "soil_moist": {
-#         "dataset": soil_moist,
-#         "list of bands": ["volumetric_soil_water_layer_1"],
-#         "title": "Soil moisture in ",
-#         "xlabel": "Date",
-#         "ylabel": "Moisture [?]",
-#         "ylim_min": -0,
-#         "ylim_max": 1
-#     },
-#     "ndvi": {
-#         "dataset": ndvi,
-#         "list of bands": ["NDVI"],
-#         "title": "NDVI in ",
-#         "xlabel": "Date",
-#         "ylabel": "NDVI",
-#         "ylim_min": -0,
-#         "ylim_max": 10000
-#     }
-# }
 dataset_list = tuple(dataset_dict.keys())
 
 # flood_risk, drought_risk, landslide_risk = calculate_indexes()
@@ -93,59 +55,132 @@ dataset_list = tuple(dataset_dict.keys())
 # ---- Create Dash app ----
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+# app.layout = dbc.Container([
+#     html.H3("🌍 Climate Risk Dashboard", style={"textAlign": "center"}),
+#     dbc.Row([
+#         dbc.Col([
+#             dcc.Checklist(
+#                 id="layer-checklist",
+#                 options=[
+#                     {"label": "Flood Risk", "value": "flood"},
+#                     {"label": "Drought Risk", "value": "drought"},
+#                     {"label": "Landslide Risk", "value": "landslide"},
+#                     {"label": "District Boundaries", "value": "districts"},
+#                 ],
+#                 value=["districts"],
+#                 inline=True,
+#                 style={"width": "50%", "margin": "auto", "textAlign": "center"},
+#             ),
+#             dl.Map(
+#                 id="map",
+#                 center=[-1.94, 30.06],
+#                 zoom=8,
+#                 children=[
+#                     dl.TileLayer(
+#                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+#                         attribution="© OpenStreetMap contributors",
+#                     ),
+#                     # dl.TileLayer(id="ee-layer")  # Placeholder for EE layers
+#                     html.Div(id="dynamic-layers")
+#                 ],
+#                 style={"width": "100%", "height": "600px", "margin": "auto", "marginTop": "10px"},
+#             )
+#         ], width=6),
+
+#         dbc.Col([
+#             html.H5("Select district"),
+#             dcc.Dropdown(
+#                 options=[{"label": d, "value": d} for d in district_list],
+#                 value=district_list[0],
+#                 id="district-dropdown"
+#             ),
+#             dcc.Dropdown(
+#                 # options=[{"label": d, "value": d} for d in dataset_list],
+#                 options=[
+#                     {"label": "Rainfall", "value": "chirps"},
+#                     {"label": "Temperature", "value": "era5_temp"},
+#                     {"label": "Soil Moisture", "value": "soil_moist"},
+#                     {"label": "Flora health", "value": "ndvi"},
+#                 ],
+#                 value="chirps",
+#                 id="dataset-dropdown"
+#             ),
+#             html.Img(id="risk-plot", style={"width": "100%", "marginTop": "10px"})
+#         ], width=6)
+#     ])
+# ], fluid=True)
+
 app.layout = dbc.Container([
-    html.H3("🌍 Climate Risk Dashboard", style={"textAlign": "center"}),
+    html.H3("🌍 Climate Risk Dashboard", style={"textAlign": "center", "marginBottom": "30px"}),
     dbc.Row([
         dbc.Col([
-                dcc.Dropdown(
-                    id="layer-select",
-                    options=[
-                        {"label": "District Boundaries", "value": "districts"},
-                        {"label": "Flood Risk", "value": "flood"},
-                        {"label": "Drought Risk", "value": "drought"},
-                        {"label": "Landslide Risk", "value": "landslide"},
-                    ],
-                    value="districts",
-                    clearable=False,
-                    style={"width": "50%", "margin": "auto"}
-                ),
-                dl.Map(
-                    id="map",
-                    center=[-1.94, 30.06],
-                    zoom=7,
-                    children=[
-                        dl.TileLayer(
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                            attribution="© OpenStreetMap contributors",
-                        ),
-                        dl.TileLayer(id="ee-layer")  # Placeholder for EE layers
-                    ],
-                    style={"width": "100%", "height": "600px", "margin": "auto", "marginTop": "10px"},
-                )
+            dbc.Card([
+                dbc.CardHeader("Map Layers"),
+                dbc.CardBody([
+                    dcc.Checklist(
+                        id="layer-checklist",
+                        options=[
+                            {"label": "Flood Risk", "value": "flood"},
+                            {"label": "Drought Risk", "value": "drought"},
+                            {"label": "Landslide Risk", "value": "landslide"},
+                            {"label": "District Boundaries", "value": "districts"},
+                        ],
+                        value=["districts"],
+                        inline=True,
+                        style={"width": "100%", "textAlign": "center"},
+                    ),
+                    dl.Map(
+                        id="map",
+                        center=[-1.94, 30.06],
+                        zoom=8,
+                        children=[
+                            dl.TileLayer(
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                                attribution="© OpenStreetMap contributors",
+                            ),
+                            html.Div(id="dynamic-layers")
+                        ],
+                        style={"width": "100%", "height": "450px", "marginTop": "10px"},
+                    )
+                ])
+            ], style={"marginBottom": "20px"})
         ], width=6),
 
         dbc.Col([
-            html.H5("Select district"),
-            dcc.Dropdown(
-                options=[{"label": d, "value": d} for d in district_list],
-                value=district_list[0],
-                id="district-dropdown"
-            ),
-            dcc.Dropdown(
-                # options=[{"label": d, "value": d} for d in dataset_list],
-                options=[
-                    {"label": "Rainfall", "value": "chirps"},
-                    {"label": "Temperature", "value": "era5_temp"},
-                    {"label": "Soil Moisture", "value": "soil_moist"},
-                    {"label": "Flora health", "value": "ndvi"},
-                ],
-                value="chirps",
-                id="dataset-dropdown"
-            ),
-            html.Img(id="risk-plot", style={"width": "100%", "marginTop": "10px"})
+            dbc.Card([
+                dbc.CardHeader("District Data"),
+                dbc.CardBody([
+                    html.H5("Select district", style={"marginBottom": "10px"}),
+                    dcc.Dropdown(
+                        options=[{"label": d, "value": d} for d in district_list],
+                        value=district_list[0],
+                        id="district-dropdown",
+                        style={"marginBottom": "15px"}
+                    ),
+                    dcc.Dropdown(
+                        options=[
+                            {"label": "Rainfall", "value": "chirps"},
+                            {"label": "Temperature", "value": "era5_temp"},
+                            {"label": "Soil Moisture", "value": "soil_moist"},
+                            {"label": "Flora health", "value": "ndvi"},
+                        ],
+                        value="chirps",
+                        id="dataset-dropdown",
+                        style={"marginBottom": "15px"}
+                    ),
+                    html.Img(id="risk-plot", style={"width": "100%", "marginTop": "10px", "borderRadius": "8px", "boxShadow": "0 2px 8px rgba(0,0,0,0.1)"})
+                ])
+            ])
         ], width=6)
-    ])
+    ]),
+    dbc.Container([
+        html.Footer(
+            "© 2025 Rwanda Climate Alerts | Powered by Earth Engine & Dash",
+            style={"textAlign": "center", "marginTop": "40px", "color": "#888"}
+        )
+    ], fluid=True)
 ], fluid=True)
+
 
 
 # ---- Callbacks ----
@@ -186,12 +221,18 @@ def update_plot(selected_district, selected_dataset):
 
 # ---- Callback ----
 @app.callback(
-    Output("ee-layer", "url"),
-    Input("layer-select", "value")
+    Output("dynamic-layers", "children"),
+    Input("layer-checklist", "value")
 )
-def update_layer(selected):
-    return get_image_url(selected)
+def update_layer(selected_layers):
+    order = ["landslide", "drought", "flood", "districts"]
 
+    layers = []
+    for layer_name in order:
+        if layer_name in selected_layers:
+            tile_url = get_image_url(layer_name)
+            layers.append(dl.TileLayer(url=tile_url, opacity=0.8))
+    return layers
 
 if __name__ == "__main__":
     app.run(
