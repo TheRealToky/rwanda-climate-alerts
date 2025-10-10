@@ -63,7 +63,26 @@ app.layout = dbc.Container([
                             html.Div(id="dynamic-layers")
                         ],
                         style={"width": "100%", "height": "450px", "marginTop": "10px"},
-                    )
+                    ),
+                    # Legend overlay
+                    html.Div([
+                        html.Div([
+                            html.Span("0", style={"color": "red", "fontWeight": "bold"}),
+                            html.Span(" (High Risk)", style={"marginLeft": "5px", "color": "red"}),
+                            html.Span(" | ", style={"margin": "0 8px"}),
+                            html.Span("1", style={"color": "green", "fontWeight": "bold"}),
+                            html.Span(" (Low Risk)", style={"marginLeft": "5px", "color": "green"}),
+                        ], style={"fontSize": "16px"})
+                    ], style={
+                        "position": "absolute",
+                        "bottom": "20px",
+                        "left": "30px",
+                        "background": "rgba(255,255,255,0.85)",
+                        "padding": "8px 16px",
+                        "borderRadius": "8px",
+                        "boxShadow": "0 2px 8px rgba(0,0,0,0.1)",
+                        "zIndex": "1000"
+                    })
                 ])
             ], style={"marginBottom": "20px"})
         ], width=6),

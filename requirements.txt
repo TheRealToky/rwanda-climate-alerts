@@ -1,0 +1,6 @@
+earthengine-api~=1.6.11rc0
+matplotlib~=3.10.6
+pandas~=2.3.3
+numpy~=2.3.3
+dash-bootstrap-components~=2.0.4
+dash~=3.2.0

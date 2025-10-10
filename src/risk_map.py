@@ -29,7 +29,7 @@ def calculate_baseline(image_collection):
     baseline_mean = baseline.mean()
 
     # Recent period (e.g., 2020–2025)
-    recent = image_collection.filterDate("2025-07-01", "2025-07-31").mean()
+    recent = image_collection.filterDate("2025-01-01", "2025-07-31").mean()
 
     # Rainfall anomaly (recent vs baseline)
     anomaly = recent.subtract(baseline_mean).divide(baseline_mean)
