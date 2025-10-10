@@ -21,12 +21,12 @@ Lightweight Dash dashboard for visualizing climate risk indices (flood, drought,
 ## Requirements
 - Python 3.8+
 - Windows OS (development tested on Windows)
+- Earth Engine account
 - Packages (install with pip):
   - dash, dash-bootstrap-components, dash-leaflet
   - pandas, numpy, matplotlib
   - earthengine-api
   - (optionally) geemap for local testing/visualization
--
 
 Install quickly:
 ```bash
@@ -48,7 +48,7 @@ python -m pip install -r requirements.txt
    ```python
    ee.Initialize(project="rwanda-climate-alerts")
    ```
-   Ensure your account has access to that project or change to your own EE project.
+   Ensure your account has access to that project or change to your own EE project (replace project="rwanda-climate-alerts" by project="[your-earth-engine-project]").
 
 For more details, please refer to the Earth Engine documentation:
 -  [Earth Engine access](https://developers.google.com/earth-engine/guides/access)
