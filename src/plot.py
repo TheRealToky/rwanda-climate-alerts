@@ -1,19 +1,20 @@
 import ee
+# from IPython.core.display_functions import display
+
 try:
     ee.Authenticate()
 except Exception as e:
     print(f"Error authenticating Earth Engine: {e}. Please ensure you have Earth Engine access.")
 
-# try:
-#     ee.Initialize(project="rwanda-climate-alerts")
-# except Exception as e:
-#     print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
+try:
+    ee.Initialize(project="rwanda-climate-alerts")
+except Exception as e:
+    print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 
-# from src.geometry import districts, rwanda, rwanda_buffered
 from src.fetch_datasets import fetch_all
 
 chirps, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
@@ -69,8 +70,6 @@ def get_time_series(image_collection, district_name, start_date, end_date, scale
                             .getRegion(district, scale=scale) \
                             .getInfo()
 
-    # date_range = [start_date, end_date]
-
     return district_time_series
 
 
@@ -105,54 +104,95 @@ def t_kelvin_to_celsius(t_kelvin):
     return t_celsius
 
 
-def plot_dataset(dataframe, district, dataset_name, dataset_info):
-    fig, ax = plt.subplots(figsize=(14, 6))
-
+def get_dataset_info(district, dataset_name, dataset_info):
     dataset = dataset_info[dataset_name]
 
-    list_of_bands = dataset["list of bands"]
-    title = dataset["title"] + district
-    xlabel = dataset["xlabel"]
-    ylabel = dataset["ylabel"]
-    ylim_min = dataset["ylim_min"]
-    ylim_max = dataset["ylim_max"]
+    plot_params = {
+        "district": district,
+        "list_of_bands": dataset["list of bands"],
+        "title": dataset["title"] + district,
+        "xlabel": dataset["xlabel"],
+        "ylabel": dataset["ylabel"],
+        "ylim_min": dataset["ylim_min"],
+        "ylim_max": dataset["ylim_max"]
+    }
 
+    return plot_params
+
+
+def plot_dataset_test(dataframe, dataset_name, ax, dataset_parameters=None, baseline=False):
     if dataset_name == "era5_temp":
-        dataframe["temperature_2m"] = dataframe["temperature_2m"].apply(t_kelvin_to_celsius)
+        if dataset_parameters:
+            dataframe["temperature_2m"] = dataframe["temperature_2m"].apply(t_kelvin_to_celsius)
+        else:
+            dataframe["agg"] = dataframe["agg"].apply(t_kelvin_to_celsius)
 
-    ax.scatter(dataframe["datetime"], dataframe[list_of_bands[0]],
-               color='gray', linewidth=1, alpha=0.7, label=f"{district} (trend)")
+    if dataset_parameters and not baseline:
+        district = f"{dataset_parameters["district"]} (trend)"
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))  # e.g., "Jun 2025"
+        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
 
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))  # e.g., "Jun 2025"
-    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
+        ax.set_title(dataset_parameters["title"], fontsize=16)
+        ax.set_xlabel(dataset_parameters["xlabel"], fontsize=14)
+        ax.set_ylabel(dataset_parameters["ylabel"], fontsize=14)
+        ax.set_ylim(dataset_parameters["ylim_min"], dataset_parameters["ylim_max"])
+        ax.grid(lw=0.5, ls='--', alpha=0.7)
 
-    # extreme = dataframe[dataframe['precipitation'] > 60]
-    # ax.scatter(extreme['datetime'], extreme['precipitation'],
-    #            color='orange', edgecolor='red', s=80, zorder=3, label='Extreme rain')
+        ax.scatter(dataframe["datetime"], dataframe[dataset_parameters["list_of_bands"]],
+                   color='gray', linewidth=1, alpha=0.5, label=district)
+    elif not dataset_parameters and baseline:
+        district = f"{dataset_parameters["district"]} (trend)"
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))  # e.g., "Jun 2025"
+        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
 
-    ax.set_title(title, fontsize=16)
-    ax.set_xlabel(xlabel, fontsize=14)
-    ax.set_ylabel(ylabel, fontsize=14)
-    ax.set_ylim(ylim_min, ylim_max)
-    ax.grid(lw=0.5, ls='--', alpha=0.7)
-    ax.legend(fontsize=14, loc='lower right')
+        ax.set_title(dataset_parameters["title"], fontsize=16)
+        ax.set_xlabel(dataset_parameters["xlabel"], fontsize=14)
+        ax.set_ylabel(dataset_parameters["ylabel"], fontsize=14)
+        ax.set_ylim(dataset_parameters["ylim_min"], dataset_parameters["ylim_max"])
+        ax.grid(lw=0.5, ls='--', alpha=0.7)
 
-    return fig, ax
+        ax.scatter(dataframe["datetime"], dataframe[dataset_parameters["list_of_bands"]],
+                   color='gray', linewidth=1, alpha=0.5, label=district)
+    else:
+        x = dataframe["datetime"]
+        y = dataframe["agg"]
+        ax.scatter(x, y, s=100, color='red', linewidth=1, alpha=0.7, label="Mean")
+        ax.plot(x, y, color='gray', linestyle='--', linewidth=1, label='Connecting Line')
 
-def main():
-    district_time_series, date_range = get_time_series(
-        dataset_dict["chirps"]["dataset"],
-        "Bugesera",
-        "2024-01-01",
-        "2024-12-31",
-        1000)
+    ax.legend(fontsize=14, loc='upper right')
 
-    df = ee_array_to_df(district_time_series, dataset_dict["chirps"]["list of bands"])
 
-    # Plot with matplotlib
-    fig, ax = plot_dataset(df, "Bugesera", "chirps", dataset_dict)
-    plt.show()
+def get_daily_average(dataframe, dataset_info):
+    dataframe = dataframe.drop("time", axis=1)
+    df_combined = dataframe.groupby("datetime").agg(
+        agg = (dataset_info["list of bands"][0], "mean"),
+    ).reset_index()
+    return df_combined
 
-if __name__ == '__main__':
-    main()
+# def main():
+#     district_time_series = get_time_series(
+#         dataset_dict["chirps"]["dataset"],
+#         "Bugesera",
+#         "2024-01-01",
+#         "2024-12-31",
+#         1000)
+#
+#     df = ee_array_to_df(district_time_series, dataset_dict["chirps"]["list of bands"])
+#     daily_average_df = get_daily_average(df, dataset_dict["chirps"])
+#
+#     # print(df[:10])
+#     # print(daily_average_df[:10])
+#
+#     # print(f"{len(df)}\n")
+#     print(df[:10])
+#     print(daily_average_df[:10])
+#     # print(len(daily_average_df))
+#
+#     # Plot with matplotlib
+#     # fig, ax = plot_dataset(df, "Bugesera", "chirps", dataset_dict)
+#     # plt.show()
+#
+# if __name__ == '__main__':
+#     main()

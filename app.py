@@ -13,7 +13,7 @@ import dash_bootstrap_components as dbc
 import io, base64
 
 from src.risk_map import get_image_url
-from src.plot import get_time_series, ee_array_to_df, plot_dataset, dataset_dict
+from src.plot import *
 from src.fetch_datasets import fetch_all
 # from src.geometry import districts
 
@@ -25,6 +25,7 @@ except Exception as e:
 
 try:
     ee.Initialize(project="rwanda-climate-alerts")
+    # ee.Initialize()
 except Exception as e:
     print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
 
@@ -34,14 +35,6 @@ district_df = pd.read_csv("data/district_boundaries/csv/District_Boundaries.csv"
 district_list = np.sort(district_df["district"].unique())
 chirps, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
 dataset_list = tuple(dataset_dict.keys())
-
-# flood_risk, drought_risk, landslide_risk = calculate_indexes()
-# map_layers_dict = {
-#     "districts": districts,
-#     "flood": flood_risk,
-#     "drought": drought_risk,
-#     "landslide": landslide_risk,
-# }
 
 # ---- Build the map (geemap + EE) ----
 # Map = make_map()
@@ -54,62 +47,6 @@ dataset_list = tuple(dataset_dict.keys())
 
 # ---- Create Dash app ----
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-# app.layout = dbc.Container([
-#     html.H3("🌍 Climate Risk Dashboard", style={"textAlign": "center"}),
-#     dbc.Row([
-#         dbc.Col([
-#             dcc.Checklist(
-#                 id="layer-checklist",
-#                 options=[
-#                     {"label": "Flood Risk", "value": "flood"},
-#                     {"label": "Drought Risk", "value": "drought"},
-#                     {"label": "Landslide Risk", "value": "landslide"},
-#                     {"label": "District Boundaries", "value": "districts"},
-#                 ],
-#                 value=["districts"],
-#                 inline=True,
-#                 style={"width": "50%", "margin": "auto", "textAlign": "center"},
-#             ),
-#             dl.Map(
-#                 id="map",
-#                 center=[-1.94, 30.06],
-#                 zoom=8,
-#                 children=[
-#                     dl.TileLayer(
-#                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-#                         attribution="© OpenStreetMap contributors",
-#                     ),
-#                     # dl.TileLayer(id="ee-layer")  # Placeholder for EE layers
-#                     html.Div(id="dynamic-layers")
-#                 ],
-#                 style={"width": "100%", "height": "600px", "margin": "auto", "marginTop": "10px"},
-#             )
-#         ], width=6),
-
-#         dbc.Col([
-#             html.H5("Select district"),
-#             dcc.Dropdown(
-#                 options=[{"label": d, "value": d} for d in district_list],
-#                 value=district_list[0],
-#                 id="district-dropdown"
-#             ),
-#             dcc.Dropdown(
-#                 # options=[{"label": d, "value": d} for d in dataset_list],
-#                 options=[
-#                     {"label": "Rainfall", "value": "chirps"},
-#                     {"label": "Temperature", "value": "era5_temp"},
-#                     {"label": "Soil Moisture", "value": "soil_moist"},
-#                     {"label": "Flora health", "value": "ndvi"},
-#                 ],
-#                 value="chirps",
-#                 id="dataset-dropdown"
-#             ),
-#             html.Img(id="risk-plot", style={"width": "100%", "marginTop": "10px"})
-#         ], width=6)
-#     ])
-# ], fluid=True)
-
 app.layout = dbc.Container([
     html.H3("🌍 Climate Risk Dashboard", style={"textAlign": "center", "marginBottom": "30px"}),
     dbc.Row([
@@ -162,7 +99,7 @@ app.layout = dbc.Container([
                             {"label": "Rainfall", "value": "chirps"},
                             {"label": "Temperature", "value": "era5_temp"},
                             {"label": "Soil Moisture", "value": "soil_moist"},
-                            {"label": "Flora health", "value": "ndvi"},
+                            {"label": "Vegetation health", "value": "ndvi"},
                         ],
                         value="chirps",
                         id="dataset-dropdown",
@@ -182,7 +119,6 @@ app.layout = dbc.Container([
 ], fluid=True)
 
 
-
 # ---- Callbacks ----
 @app.callback(
     Output("risk-plot", "src"),
@@ -190,8 +126,6 @@ app.layout = dbc.Container([
     Input("dataset-dropdown", "value")
 )
 def update_plot(selected_district, selected_dataset):
-    # subset = df[df["district"]] == selected_district
-
     district_time_series = get_time_series(
                             dataset_dict[selected_dataset]["dataset"],
                             selected_district,
@@ -199,16 +133,26 @@ def update_plot(selected_district, selected_dataset):
                             "2024-12-31",
                             1000)
 
+    district_baseline = get_time_series(
+                            dataset_dict[selected_dataset]["dataset"],
+                            selected_district,
+                            "2005-01-01",
+                            "2020-12-31",
+                            1000)
+
     df = ee_array_to_df(district_time_series, dataset_dict[selected_dataset]["list of bands"])
+    daily_average_df = get_daily_average(df, dataset_dict[selected_dataset])
+    baseline_df = ee_array_to_df(district_baseline, dataset_dict[selected_dataset])
 
     # Plot with matplotlib
-    fig, ax = plot_dataset(df, selected_district, selected_dataset, dataset_dict)
+    fig, ax = plt.subplots(figsize=(14, 6))
+    dataset_info = get_dataset_info(selected_district, selected_dataset, dataset_dict)
+
+    plot_dataset_test(df, selected_dataset, ax, dataset_info)
+    plot_dataset_test(daily_average_df, selected_dataset, ax)
+    plot_dataset_test(baseline_df, selected_dataset, ax)
+
     plt.tight_layout()
-    # fig, ax = plt.subplots(figsize=(6, 3))
-    # ax.plot(subset["date"], subset["risk"], marker="o")
-    # ax.set_title(f"Risk over time: {selected_district}")
-    # ax.set_xlabel("Date")
-    # ax.set_ylabel("Risk Index")
 
     # Convert to base64 for display in Dash
     buf = io.BytesIO()
