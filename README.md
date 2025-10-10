@@ -2,6 +2,7 @@
 
 Lightweight Dash dashboard for visualizing climate risk indices (flood, drought, landslide) for Rwanda using Google Earth Engine datasets.
 
+
 ## Features
 - Interactive map (dash-leaflet) with selectable risk layers and district boundaries
 - Time-series plots for districts (precipitation, temperature, soil moisture, vegetation health (NDVI))
@@ -25,6 +26,7 @@ Lightweight Dash dashboard for visualizing climate risk indices (flood, drought,
   - pandas, numpy, matplotlib
   - earthengine-api
   - (optionally) geemap for local testing/visualization
+-
 
 Install quickly:
 ```bash
@@ -48,6 +50,10 @@ python -m pip install -r requirements.txt
    ```
    Ensure your account has access to that project or change to your own EE project.
 
+For more details, please refer to the Earth Engine documentation:
+-  [Earth Engine access](https://developers.google.com/earth-engine/guides/access)
+-  [Authentication and Initialization](https://developers.google.com/earth-engine/guides/auth)
+
 Note: Earth Engine objects live in the cloud. Local shapefiles must be uploaded as EE assets (or converted to CSV/GeoJSON and accessed locally) — `.getInfo()` only works on EE objects already in the cloud.
 
 ## Running the app
@@ -56,6 +62,11 @@ From repository root (Windows PowerShell / CMD):
 python app.py
 ```
 Open http://127.0.0.1:8050 in a browser.
+
+## Data Sources
+- [Earth Engine Datasets](https://earthengine.google.com/)
+- [District/Sectors CSV](https://geospatial-open-data-site-nisrgis.hub.arcgis.com/datasets/b4bcf921d2854ef6a39e94185abf11bc_0/explore?location=-2.064849%2C29.917646%2C8.32)
+- [Model Evaluation and Validation](https://www.gfdrr.org/sites/default/files/publication/National_Risk_Atlas_of_Rwanda_electronic_version_0.pdf)
 
 ## Styling (assets)
 Dash auto-loads files in an `assets/` folder. Create `assets/custom.css` to override styles. Example snippet:
