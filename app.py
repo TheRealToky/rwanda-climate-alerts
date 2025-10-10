@@ -7,6 +7,7 @@ from dash import Dash, html, dcc, Input, Output
 import dash_leaflet as dl
 import dash_bootstrap_components as dbc
 
+from config import EE_PROJECT
 from src.risk_map import get_image_url
 from src.plot import *
 from src.fetch_datasets import fetch_all
@@ -18,7 +19,7 @@ except Exception as e:
     print(f"Error authenticating Earth Engine: {e}. Please ensure you have Earth Engine access.")
 
 try:
-    ee.Initialize(project="rwanda-climate-alerts")
+    ee.Initialize(project=EE_PROJECT)
     # ee.Initialize()
 except Exception as e:
     print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
@@ -133,8 +134,8 @@ def update_plot(selected_district, selected_dataset):
     district_time_series = get_time_series(
                             dataset_dict[selected_dataset]["dataset"],
                             selected_district,
-                            "2024-01-01",
-                            "2024-12-31",
+                            "2024-07-01",
+                            "2025-07-31",
                             1000)
 
     df = ee_array_to_df(district_time_series, dataset_dict[selected_dataset]["list of bands"])

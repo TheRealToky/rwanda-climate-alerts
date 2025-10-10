@@ -1,3 +1,4 @@
+from config import EE_PROJECT
 import ee
 try:
     ee.Authenticate()
@@ -5,7 +6,7 @@ except Exception as e:
     print(f"Error authenticating Earth Engine: {e}. Please ensure you have Earth Engine access.")
 
 try:
-    ee.Initialize(project="rwanda-climate-alerts")
+    ee.Initialize(project=EE_PROJECT)
 except Exception as e:
     print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
 
