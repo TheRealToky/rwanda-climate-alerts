@@ -54,19 +54,3 @@ def fetch_all():
     slope = ee.Terrain.slope(dem)
 
     return chirps, era5_temp, soil_moist, ndvi, dem, slope
-
-
-# def main():
-#     chrips = fetch_dataset("UCSB-CHG/CHIRPS/DAILY")
-#     chirps_2, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
-#
-#     print(type(chrips))
-#     print(type(chirps_2))
-#     print(type(era5_temp))
-#     print(type(era5_temp))
-#     print(type(ndvi))
-#     print(type(dem))
-#     print(type(slope))
-#
-# if __name__ == "__main__":
-#     main()

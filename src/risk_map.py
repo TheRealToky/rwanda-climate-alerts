@@ -69,17 +69,10 @@ def aggregate_risk(risk_index):
 
 
 def calculate_indexes():
-    # monthly_chirps, monthly_chirps_sum = aggregate_monthly(chirps)
-    # monthly_era5_temp, monthly_era5_temp_sum = aggregate_monthly(era5_temp)
-    # monthly_soil_moist, monthly_soil_moist_sum = aggregate_monthly(soil_moist)
-    # monthly_ndvi, monthly_ndvi_sum = aggregate_monthly(ndvi)
-
-
     rain_baseline, rain_baseline_mean, rain_anomaly = calculate_baseline(chirps)
     temp_baseline, temp_baseline_mean, temp_anomaly = calculate_baseline(era5_temp)
     soil_moist_baseline, soil_moist_baseline_mean, soil_moist_anomaly = calculate_baseline(soil_moist)
     # ndvi_baseline, ndvi_baseline_mean, ndvi_anomaly = calculate_baseline(ndvi)
-
 
     rain_norm = normalize(rain_anomaly, districts)
     temp_norm = normalize(temp_anomaly, districts)
@@ -105,10 +98,6 @@ def calculate_indexes():
                             .add(soil_moist_norm.multiply(0.3)) \
                             .add(slope_norm.multiply(0.3))
 
-
-    # flood_risk_stats = aggregate_risk(flood_risk_index)
-    # drought_risk_stats = aggregate_risk(drought_risk_index)
-    # landslide_risk_stats = aggregate_risk(landslide_risk_index)
 
     return flood_risk_index, drought_risk_index, landslide_risk_index
 
@@ -137,17 +126,3 @@ def get_image_url(selected_layer):
         tile_url = map_id_dict['tile_fetcher'].url_format
 
     return tile_url
-
-
-# def main():
-#     flood_risk_index, drought_risk_index, landslide_risk_index = calculate_indexes()
-#     flood_index_url = get_image_url(flood_risk_index)
-#     drought_index_url = get_image_url(drought_risk_index)
-#     landslide_index_url = get_image_url(landslide_risk_index)
-#
-#     print("Flood Risk:", flood_index_url, type(flood_index_url,))
-#     print("Drought Risk:", drought_index_url, type(drought_index_url,))
-#     print("Landslide Risk:", landslide_index_url, type(landslide_index_url,))
-#
-# if __name__ == '__main__':
-#     main()

@@ -1,6 +1,4 @@
 import ee
-# from IPython.core.display_functions import display
-
 try:
     ee.Authenticate()
 except Exception as e:
@@ -156,29 +154,3 @@ def get_daily_average(dataframe, dataset_info):
         agg = (dataset_info["list of bands"][0], "mean"),
     ).reset_index()
     return df_combined
-
-# def main():
-#     district_time_series = get_time_series(
-#         dataset_dict["chirps"]["dataset"],
-#         "Bugesera",
-#         "2024-01-01",
-#         "2024-12-31",
-#         1000)
-#
-#     df = ee_array_to_df(district_time_series, dataset_dict["chirps"]["list of bands"])
-#     daily_average_df = get_daily_average(df, dataset_dict["chirps"])
-#
-#     # print(df[:10])
-#     # print(daily_average_df[:10])
-#
-#     # print(f"{len(df)}\n")
-#     print(df[:10])
-#     print(daily_average_df[:10])
-#     # print(len(daily_average_df))
-#
-#     # Plot with matplotlib
-#     # fig, ax = plot_dataset(df, "Bugesera", "chirps", dataset_dict)
-#     # plt.show()
-#
-# if __name__ == '__main__':
-#     main()
