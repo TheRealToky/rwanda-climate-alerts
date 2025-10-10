@@ -1,21 +1,15 @@
-# import geopandas as gpd
-# import geemap.foliumap as geemap
 import matplotlib
-import matplotlib.pyplot as plt
 matplotlib.use('agg')
 import numpy as np
-import pandas as pd
+import io, base64
 
 from dash import Dash, html, dcc, Input, Output
 import dash_leaflet as dl
 import dash_bootstrap_components as dbc
 
-import io, base64
-
 from src.risk_map import get_image_url
 from src.plot import *
 from src.fetch_datasets import fetch_all
-# from src.geometry import districts
 
 import ee
 try:
@@ -30,20 +24,11 @@ except Exception as e:
     print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
 
 
-# ---- Load your data ----
+# ---- Load data ----
 district_df = pd.read_csv("data/district_boundaries/csv/District_Boundaries.csv")
 district_list = np.sort(district_df["district"].unique())
 chirps, era5_temp, soil_moist, ndvi, dem, slope = fetch_all()
 dataset_list = tuple(dataset_dict.keys())
-
-# ---- Build the map (geemap + EE) ----
-# Map = make_map()
-# Map.add_basemap("HYBRID")
-#
-# Save map as HTML so we can embed in Dash
-# Map.save("map.html")
-# output_html_file = "map.html"
-# Map.to_html(filename=output_html_file, title="Risk Index Map", width="100%", height="500px")
 
 # ---- Create Dash app ----
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -170,10 +155,4 @@ def update_layer(selected_layers):
     return layers
 
 if __name__ == "__main__":
-    app.run(
-        debug=True
-        # dev_tools_props_check=True,
-        # dev_tools_hot_reload=True,
-        # dev_tools_ui=True,
-        # dev_tools_silence_routes_logging=False
-    )
+    app.run()
