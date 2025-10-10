@@ -134,7 +134,7 @@ def update_plot(selected_district, selected_dataset):
     district_time_series = get_time_series(
                             dataset_dict[selected_dataset]["dataset"],
                             selected_district,
-                            "2024-07-01",
+                            "2024-08-01",
                             "2025-07-31",
                             1000)
 
