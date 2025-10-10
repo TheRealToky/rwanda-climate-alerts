@@ -120,14 +120,14 @@ def get_dataset_info(district, dataset_name, dataset_info):
     return plot_params
 
 
-def plot_dataset_test(dataframe, dataset_name, ax, dataset_parameters=None, baseline=False):
+def plot_dataset_test(dataframe, dataset_name, ax, dataset_parameters=None):
     if dataset_name == "era5_temp":
         if dataset_parameters:
             dataframe["temperature_2m"] = dataframe["temperature_2m"].apply(t_kelvin_to_celsius)
         else:
             dataframe["agg"] = dataframe["agg"].apply(t_kelvin_to_celsius)
 
-    if dataset_parameters and not baseline:
+    if dataset_parameters:
         district = f"{dataset_parameters["district"]} (trend)"
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))  # e.g., "Jun 2025"
         ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
@@ -140,26 +140,12 @@ def plot_dataset_test(dataframe, dataset_name, ax, dataset_parameters=None, base
         ax.grid(lw=0.5, ls='--', alpha=0.7)
 
         ax.scatter(dataframe["datetime"], dataframe[dataset_parameters["list_of_bands"]],
-                   color='gray', linewidth=1, alpha=0.5, label=district)
-    elif not dataset_parameters and baseline:
-        district = f"{dataset_parameters["district"]} (trend)"
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))  # e.g., "Jun 2025"
-        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-        plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
-
-        ax.set_title(dataset_parameters["title"], fontsize=16)
-        ax.set_xlabel(dataset_parameters["xlabel"], fontsize=14)
-        ax.set_ylabel(dataset_parameters["ylabel"], fontsize=14)
-        ax.set_ylim(dataset_parameters["ylim_min"], dataset_parameters["ylim_max"])
-        ax.grid(lw=0.5, ls='--', alpha=0.7)
-
-        ax.scatter(dataframe["datetime"], dataframe[dataset_parameters["list_of_bands"]],
-                   color='gray', linewidth=1, alpha=0.5, label=district)
+                   color='gray', linewidth=1, alpha=0.1, label=district)
     else:
         x = dataframe["datetime"]
         y = dataframe["agg"]
-        ax.scatter(x, y, s=100, color='red', linewidth=1, alpha=0.7, label="Mean")
-        ax.plot(x, y, color='gray', linestyle='--', linewidth=1, label='Connecting Line')
+        ax.scatter(x, y, s=100, color='red', linewidth=1, alpha=0.5, label="Mean")
+        ax.plot(x, y, color='gray', linestyle='--', linewidth=1, label='Graph')
 
     ax.legend(fontsize=14, loc='upper right')
 

@@ -5,10 +5,10 @@ try:
 except Exception as e:
     print(f"Error authenticating Earth Engine: {e}. Please ensure you have Earth Engine access.")
 
-# try:
-#     ee.Initialize(project="rwanda-climate-alerts")
-# except Exception as e:
-#     print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
+try:
+    ee.Initialize(project="rwanda-climate-alerts")
+except Exception as e:
+    print(f"Error initializing Earth Engine: {e}. Please ensure you are authenticated.")
 
 from src.geometry import districts
 from src.fetch_datasets import fetch_all

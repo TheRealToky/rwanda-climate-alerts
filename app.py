@@ -133,16 +133,8 @@ def update_plot(selected_district, selected_dataset):
                             "2024-12-31",
                             1000)
 
-    district_baseline = get_time_series(
-                            dataset_dict[selected_dataset]["dataset"],
-                            selected_district,
-                            "2005-01-01",
-                            "2020-12-31",
-                            1000)
-
     df = ee_array_to_df(district_time_series, dataset_dict[selected_dataset]["list of bands"])
     daily_average_df = get_daily_average(df, dataset_dict[selected_dataset])
-    baseline_df = ee_array_to_df(district_baseline, dataset_dict[selected_dataset])
 
     # Plot with matplotlib
     fig, ax = plt.subplots(figsize=(14, 6))
@@ -150,7 +142,6 @@ def update_plot(selected_district, selected_dataset):
 
     plot_dataset_test(df, selected_dataset, ax, dataset_info)
     plot_dataset_test(daily_average_df, selected_dataset, ax)
-    plot_dataset_test(baseline_df, selected_dataset, ax)
 
     plt.tight_layout()
 
